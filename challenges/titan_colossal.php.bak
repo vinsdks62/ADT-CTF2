@@ -1,0 +1,80 @@
+<?php
+// Titan Colossal - LFI multi-étapes
+$flag = "ESD{TITAN_COLOSSAL}";
+
+// "Système de fichiers" simulé
+$files = [
+    "intro" => "<p>Bienvenue au Titan Colossal. Le Bataillon d'exploration garde des secrets.</p>",
+    // info contient un indice encodé (base64) — le joueur doit décoder ça pour trouver le vrai chemin à inclure
+    "info"  => "<p>Indice récupéré du Bataillon : <code>" . base64_encode("../vault/flag.txt") . "</code></p>
+                <p>Décoder la chaîne pour trouver le chemin caché.</p>",
+    "vault/notes.txt" => "<p>Notes internes : Ne pas laisser fuiter.</p>",
+    // fichier caché contenant le flag (ne doit pas être accessible directement via 'intro' ou 'info')
+    "vault/flag.txt"  => "<p>Secret du Titan Colossal : <strong>$flag</strong></p>"
+];
+
+// Récupérer paramètre page (ou "intro" par défaut)
+$raw = $_GET['page'] ?? "intro";
+
+// Normalisation : urldecode, suppression des null bytes et compactage des slashes
+$decoded = urldecode($raw);
+$decoded = str_replace("\0", "", $decoded);
+$normalized = preg_replace('#/+#','/', $decoded);
+$normalized = trim($normalized, "/"); // enlever slash début/fin pour comparaison contrôlée
+
+$content = "Page introuvable.";
+
+// Règle de sécurité simulée : seules "intro" et "info" sont autorisées en clair.
+// Le joueur doit fournir le chemin exact décodé (../vault/flag.txt) — on le détecte après normalisation.
+if ($normalized === "intro") {
+    $content = $files["intro"];
+}
+elseif ($normalized === "info") {
+    $content = $files["info"];
+}
+else {
+    // On autorise les tentatives d'inclusion seulement si le joueur a trouvé le bon chemin (../vault/flag.txt)
+    // Pour éviter les contournements simples, on exige la forme exacte "../vault/flag.txt" (après urldecode),
+    // mais on compare en enlevant les / en début (normalized trim).
+    // L'étape d'investigation : l'info page fournit base64("../vault/flag.txt").
+    $must = preg_replace('#/+#','/', "../vault/flag.txt");
+    $must = trim($must, "/"); // => "..vault/flag.txt" for our normalized compare
+
+    // Pour compenser, on autorise aussi les cas où l'utilisateur envoie "%2e%2e%2Fvault%2Fflag.txt" (decoded above)
+    if ($normalized === $must || $decoded === "../vault/flag.txt" || $decoded === "%2e%2e%2Fvault%2Fflag.txt") {
+        // afficher le contenu du fichier caché (le flag)
+        $content = $files["vault/flag.txt"];
+    } else {
+        // fausse sécurité, message générique pour tromper
+        $content = "<p>Accès refusé. Le système détecte une tentative d'inclusion non autorisée.</p>
+                    <p>Indice : commencez par consulter la page 'info' pour obtenir un indice encodé.</p>";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Titan Colossal - LFI (niveau renforcé)</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#0f1720; color:#e6eef6; text-align:center; padding:30px; }
+        h1 { color:#7dd3fc; }
+        .box { background:#0b1220; padding:18px; border-radius:8px; display:inline-block; max-width:760px; text-align:left; }
+        a { color:#c7f9ff; }
+        code { background:#071021; padding:4px 6px; border-radius:4px; }
+    </style>
+</head>
+<body>
+    <h1>Titan Colossal — Inclusion de fichiers</h1>
+    <div class="box">
+        <?php echo $content; ?>
+        <hr>
+        <p>Pages valides : 
+            <a href="?page=intro">intro</a> | 
+            <a href="?page=info">info</a>
+        </p>
+        <p>Pour avancer : consulte l'info, décode la chaîne Base64 fournie, puis inclue le chemin décodé via le paramètre <code>page</code>.</p>
+    </div>
+</body>
+</html>
