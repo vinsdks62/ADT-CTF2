@@ -1,0 +1,10 @@
+# Framework web
+Flask==2.3.4
+Werkzeug==2.3.8
+
+# Pour le challenge Titan Originel (RCE PoC)
+requests==2.32.1
+beautifulsoup4==4.13.0
+
+# Utilitaires divers
+python-dotenv==1.0.0

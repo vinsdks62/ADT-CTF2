@@ -1,30 +1,23 @@
-from flask import Flask, request, render_template_string
+#!/usr/bin/env python3
 import os
+from flask import Flask, request, send_from_directory
+from PIL import Image
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = './uploads'
+UPLOAD_FOLDER = "./uploads"
+FLAG_FILE = "./flag_originel.txt"
+
+# Crée le dossier uploads s'il n'existe pas
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-FLAG_FILE = './flag.txt'
-with open(FLAG_FILE, 'w') as f:
-    f.write('ESD{TITAN_ORIGINEL_RCE}')
+# Route pour servir le fichier caché
+@app.route('/hidden/<path:filename>')
+def serve_hidden(filename):
+    # Sert uniquement les fichiers existants dans uploads
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@app.route('/')
-def index():
-    return render_template_string('''
-        <h1>Titan Originel RCE Challenge</h1>
-        <form method="post" action="/upload" enctype="multipart/form-data">
-            <input type="file" name="file">
-            <input type="submit" value="Upload">
-        </form>
-    ''')
-
+# Route d'upload
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'file' not in request.files:
@@ -32,19 +25,40 @@ def upload():
     file = request.files['file']
     if file.filename == '':
         return '<pre>Error: No selected file</pre>'
-    if file and allowed_file(file.filename):
+
+    if file and file.filename.lower().endswith(".png"):
         filepath = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(filepath)
-        # RCE simulation: execute code if payload present in filename (for simplicity)
-        if file.filename == 'read_flag.png':
+
+        # Lecture des métadonnées PNG
+        try:
+            img = Image.open(filepath)
+            png_meta = img.info
+        except Exception as e:
+            return f'<pre>Error reading PNG: {e}</pre>'
+
+        # Vérification de la clé
+        if 'originel_key' in file.filename or any('originel_key' in str(v) for v in png_meta.values()):
             try:
                 with open(FLAG_FILE) as f:
-                    flag = f.read()
+                    flag = f.read().strip()
                 return f'<pre>Flag: {flag}</pre>'
             except Exception as e:
-                return f'<pre>Error: {e}</pre>'
+                return f'<pre>Error reading flag: {e}</pre>'
+
         return f'<pre>File uploaded: {file.filename}</pre>'
+
     return '<pre>Error: File not allowed</pre>'
 
+# Route racine pour test simple
+@app.route('/')
+def index():
+    return '<h1>Titan Originel Challenge</h1><p>Upload your PNG to /upload</p>'
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=9000)
+    # Fichier de test du flag
+    if not os.path.exists(FLAG_FILE):
+        with open(FLAG_FILE, 'w') as f:
+            f.write("ESD{TITAN_ORIGINEL_RCE}")
+
+    app.run(host='0.0.0.0', port=9000)

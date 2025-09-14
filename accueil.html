@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Attaque des Titans - Hub de Sécurité</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 50%, #1a1a1a 100%);
+            color: #f0f0f0;
+            font-family: 'Cinzel', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 69, 0, 0.05) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 30%, rgba(139, 69, 19, 0.03) 50%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .title {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b35, #f7931e, #ffdc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: #b8860b;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(184, 134, 11, 0.3);
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            color: #cccccc;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .challenge-card {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 2px solid #8b4513;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+        
+        .challenge-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+        
+        .challenge-card:hover::before {
+            animation: shimmer 1.5s ease-in-out;
+            opacity: 1;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .challenge-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #ff6b35;
+            box-shadow: 
+                0 20px 40px rgba(255, 107, 53, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.2);
+        }
+        
+        .challenge-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .sqli { color: #ff4444; }
+        .titan-colossal { color: #ff6b35; }
+        .xss { color: #44ff44; }
+        .titan-originel { color: #ffd700; }
+        
+        .challenge-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #f0f0f0;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .challenge-description {
+            color: #cccccc;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .challenge-link {
+            display: inline-block;
+            background: linear-gradient(45deg, #8b4513, #a0522d);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .challenge-link:hover {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+            border-color: #ffd700;
+        }
+        
+        .walls-section {
+            margin-top: 60px;
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(255, 69, 0, 0.05));
+            border-radius: 20px;
+            border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+        
+        .walls-title {
+            font-size: 2.5rem;
+            color: #ff6b35;
+            margin-bottom: 20px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+        }
+        
+        .walls-text {
+            font-size: 1.2rem;
+            color: #e0e0e0;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            padding: 30px;
+            border-top: 2px solid #8b4513;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.8), rgba(45, 24, 16, 0.8));
+        }
+        
+        .footer-text {
+            color: #b8860b;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .challenges-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .challenge-card {
+                padding: 20px;
+            }
+        }
+        
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ff6b35;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.6; }
+            50% { transform: translateY(-20px) translateX(10px); opacity: 1; }
+        }
+        
+        .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { top: 60%; left: 80%; animation-delay: 1s; }
+        .particle:nth-child(3) { top: 40%; left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { top: 80%; left: 60%; animation-delay: 3s; }
+        .particle:nth-child(5) { top: 15%; left: 70%; animation-delay: 4s; }
+    </style>
+</head>
+<body>
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="title">L'ATTAQUE DES TITANS</h1>
+            <h2 class="subtitle">Hub de Défense des Murs</h2>
+            <p class="description">
+                Bienvenue dans le centre de commandement des défenses de l'humanité. 
+                Chaque mission représente un défi critique pour protéger nos murs contre les titans. 
+                Préparez-vous à affronter les menaces qui pèsent sur notre survie.
+            </p>
+        </header>
+
+        <main class="challenges-grid">
+            <div class="challenge-card" onclick="window.open('http://localhost:8000', '_blank')">
+                <span class="challenge-icon sqli">⚔️</span>
+                <h3 class="challenge-title">SQLi Shiganshina</h3>
+                <p class="challenge-description">
+                    Le district de Shiganshina est sous attaque ! Les bases de données sont compromises. 
+                    Utilisez vos compétences en injection SQL pour percer les défenses ennemies.
+                </p>
+                <a href="http://localhost:8000" class="challenge-link" onclick="event.stopPropagation()">
+                    LANCER LA MISSION
+                </a>
+            </div>
+
+            <div class="challenge-card" onclick="window.open('http://localhost:8001/titan_colossal.php', '_blank')">
+                <span class="challenge-icon titan-colossal">🔥</span>
+                <h3 class="challenge-title">Titan Colossal</h3>
+                <p class="challenge-description">
+                    Le Titan Colossal menace de détruire le Mur Maria ! 
+                    Cette menace titanesque nécessite toute votre expertise pour être neutralisée.
+                </p>
+                <a href="http://localhost:8001/titan_colossal.php" class="challenge-link" onclick="event.stopPropagation()">
+                    AFFRONTER LE TITAN
+                </a>
+            </div>
+
+            <div class="challenge-card" onclick="window.open('http://localhost:8002/xss_mur_maria.php', '_blank')">
+                <span class="challenge-icon xss">🛡️</span>
+                <h3 class="challenge-title">XSS Mur Maria</h3>
+                <p class="challenge-description">
+                    Les systèmes de communication du Mur Maria ont été infiltrés ! 
+                    Exploitez les vulnérabilités XSS pour restaurer notre réseau de défense.
+                </p>
+                <a href="http://localhost:8002/xss_mur_maria.php" class="challenge-link" onclick="event.stopPropagation()">
+                    SÉCURISER LE MUR
+                </a>
+            </div>
+
+            <div class="challenge-card" onclick="window.open('http://localhost:9000', '_blank')">
+                <span class="challenge-icon titan-originel">👑</span>
+                <h3 class="challenge-title">Titan Originel</h3>
+                <p class="challenge-description">
+                    Le pouvoir ancestral du Titan Originel doit être maîtrisé. 
+                    Cette mission ultime déterminera le sort de l'humanité toute entière.
+                </p>
+                <a href="http://localhost:9000" class="challenge-link" onclick="event.stopPropagation()">
+                    DÉFIER LE DESTIN
+                </a>
+            </div>
+        </main>
+
+        <section class="walls-section">
+            <h2 class="walls-title">Pour l'Humanité !</h2>
+            <p class="walls-text">
+                "Ce jour-là, l'humanité se souvint de la terreur d'être dominée par eux, 
+                et de la honte d'être emprisonnée dans une cage d'oiseaux."
+                <br><br>
+                Chaque challenge représente une bataille cruciale dans notre guerre contre l'extinction. 
+                Utilisez vos compétences, exploitez les failles, et prouvez que l'humanité ne capitulera jamais !
+            </p>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p class="footer-text">
+            🗡️ "Shinzou wo Sasageyo !" - Dédiez vos cœurs ! 🗡️
+        </p>
+    </footer>
+
+    <script>
+        // Animation d'entrée pour les cartes
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.challenge-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px)';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+
+        // Effet de survol avancé pour les cartes
+        document.querySelectorAll('.challenge-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 25px 50px rgba(255, 107, 53, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)';
+            });
+        });
+
+        // Effet de clic pour les liens
+        document.querySelectorAll('.challenge-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Animation de clic
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1.05)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
